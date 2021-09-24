@@ -1,0 +1,4 @@
+defaults:
+  - /class/data: CmnistDataModule
+
+padding: 0

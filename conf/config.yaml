@@ -1,0 +1,3 @@
+defaults:
+  - Experiment
+  - data: celeba/gender

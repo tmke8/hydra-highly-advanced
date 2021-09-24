@@ -1,0 +1,4 @@
+defaults:
+  - /class/data: CelebaDataModule
+
+target_attr: gender
