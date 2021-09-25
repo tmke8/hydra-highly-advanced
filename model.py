@@ -1,18 +1,18 @@
-from abc import abstractmethod
 from enum import Enum, auto
 import attr
+
+from third_party import DataModule
 
 __all__ = ["CelebaDataModule", "CmnistDataModule", "Experiment"]
 
 
-@attr.s(auto_attribs=True, kw_only=True, repr=False, eq=False, init=False)
-class DataModule:
-    def __init__(self):
-        self.initialized: bool = True
+@attr.s(auto_attribs=True, kw_only=True, repr=False, eq=False)
+class BaseDataModule(DataModule):
+    """Base for all our own data modules."""
 
-    @abstractmethod
-    def get_name(self) -> str:
-        """Name of the dataset."""
+    def __attrs_pre_init__(self):
+        # we have to manually call super().__init__() because the parent class is not an attr class
+        super().__init__()
 
 
 class CelebAttr(Enum):
@@ -21,22 +21,16 @@ class CelebAttr(Enum):
 
 
 @attr.s(auto_attribs=True, kw_only=True, repr=False, eq=False)
-class CelebaDataModule(DataModule):
+class CelebaDataModule(BaseDataModule):
     target_attr: CelebAttr = CelebAttr.gender
-
-    def __attrs_pre_init__(self):
-        super().__init__()
 
     def get_name(self) -> str:
         return "celeba"
 
 
 @attr.s(auto_attribs=True, kw_only=True, repr=False, eq=False)
-class CmnistDataModule(DataModule):
+class CmnistDataModule(BaseDataModule):
     padding: int = 2
-
-    def __attrs_pre_init__(self):
-        super().__init__()
 
     def get_name(self) -> str:
         return "cmnist"
@@ -46,7 +40,7 @@ class CmnistDataModule(DataModule):
 class Experiment:
     """Main class for the experiment."""
 
-    data: DataModule
+    data: BaseDataModule
     seed: int = 42
     use_wandb: bool = False
 
