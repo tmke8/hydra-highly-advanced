@@ -1,4 +1,5 @@
 from enum import Enum, auto
+
 import attr
 
 from third_party import DataModule
