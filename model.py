@@ -1,8 +1,11 @@
+from dataclasses import dataclass
 from enum import Enum, auto
+from typing import Optional
 
 import attr
+from omegaconf import MISSING
 
-from third_party import DataModule
+from third_party import DataModule, Trainer
 
 __all__ = ["CelebaDataModule", "CmnistDataModule", "Experiment"]
 
@@ -37,11 +40,21 @@ class CmnistDataModule(BaseDataModule):
         return "cmnist"
 
 
+@dataclass
+class TrainerConf:
+    _target_: str = "third_party.Trainer"
+    num_gpus: int = MISSING
+    max_epochs: Optional[int] = None
+    val_check_interval: float = 1.0
+    precision: int = 32
+
+
 @attr.s(auto_attribs=True, kw_only=True, repr=False, eq=False)
 class Experiment:
     """Main class for the experiment."""
 
     data: BaseDataModule
+    trainer: TrainerConf
     seed: int = 42
     use_wandb: bool = False
 
@@ -50,3 +63,5 @@ class Experiment:
         assert isinstance(self.data, DataModule)
         print(f"Dataset: {self.data.get_name()}")
         print(f"Is initialized: {self.data.initialized}")
+        assert isinstance(self.trainer, Trainer)
+        print(f"trainer.num_gpus: {self.trainer.num_gpus}")

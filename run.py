@@ -1,5 +1,6 @@
 import hydra
 from hydra.core.config_store import ConfigStore
+from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
 from model import CelebaDataModule, CmnistDataModule, Experiment
@@ -12,7 +13,10 @@ cs.store(node=CmnistDataModule, name="CmnistDataModule", package="data", group="
 
 @hydra.main(config_path="conf", config_name="config")
 def main(hydra_config: DictConfig):
-    exp = OmegaConf.to_object(hydra_config)
+    # first instantiate any entries that have `_target_` defined
+    omega_dict = instantiate(hydra_config)
+    # then instantiate the rest
+    exp = OmegaConf.to_object(omega_dict)
     assert isinstance(exp, Experiment)  # .to_object() turned the config object into the real object
     exp.train()
 
