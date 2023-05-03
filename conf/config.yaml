@@ -1,7 +1,5 @@
 defaults:
   - Experiment
+  - trainer: 2gpus
   - data: celeba/gender
   - _self_  # to silence a warning
-
-trainer:
-  num_gpus: 2
