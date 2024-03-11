@@ -1,6 +1,6 @@
 # Highly advanced example of using hydra
 
-Here, we make use of `attrs.define` to turn regular classes into config classes for hydra.
+Here, we use tricks like a custom `__new__` function to turn regular classes into config classes for hydra.
 We then use `instantiate()` with `_convert_="object"` to instantiate these classes.
 Except for the `instantiate()` call, most interesting things happen in `model.py`.
 
@@ -13,14 +13,20 @@ Second, classes that are to be instantiated may not take structured configs (i.e
 as arguments.
 
 ## Usage
+Requires Python 3.10+ and `hydra-core` 1.3+.
 
-To run this example with default settings:
+The simplest valid invocation is this:
 
 ```
-python run.py
+python run.py seed=0 data=cmnist
 ```
 
-Overriding the choice of data:
+This uses the config values stored in `conf/data/celeba/gender.yaml`:
 ```
-python run.py data=cmnist/no_padding
+python run.py seed=1 data=celeba/gender
+```
+
+And this one uses `conf/trainer/4gpus.yaml`:
+```
+python run.py trainer=4gpus data=cmnist seed=0
 ```

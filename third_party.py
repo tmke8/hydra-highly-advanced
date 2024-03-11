@@ -1,4 +1,5 @@
-"""This file is supposed to represent a third-party library over which we don't have control."""
+"""This file is uupposed to represent a third-party library over which we don't have control."""
+
 from abc import abstractmethod
 from typing import Optional
 
@@ -7,6 +8,7 @@ __all__ = ["DataModule", "Trainer"]
 
 class DataModule:
     def __init__(self):
+        # Simulate the initialization of the data module.
         self.initialized: bool = True
 
     @abstractmethod

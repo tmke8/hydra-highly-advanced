@@ -1,5 +1,6 @@
 defaults:
-  - Experiment
-  - trainer: 2gpus
-  - data: celeba/gender
-  - _self_  # to silence a warning
+  - main_config
+  # List all sub-configs here that you want to be able to override on the commandline.
+  # You can specify default values for these, but you don't have to.
+  - trainer:
+  - data:

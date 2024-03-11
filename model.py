@@ -1,20 +1,24 @@
+from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Optional
-
-from attrs import define, field
+from typing import Any, Optional, final
+from typing_extensions import Self
 
 from third_party import DataModule, Trainer
 
 __all__ = ["CelebaDataModule", "CmnistDataModule", "Experiment"]
 
 
-@define(kw_only=True, repr=False, eq=False)
-class BaseDataModule(DataModule):
-    """Base for all our own data modules."""
+@dataclass(kw_only=True, repr=False, eq=False)
+class DcDataModule(DataModule):
+    """Dataclass-compatible base of our data modules."""
 
-    def __attrs_pre_init__(self):
-        # we have to manually call super().__init__() because the parent class is not an attr class
-        super().__init__()
+    @final
+    def __new__(cls, *args: Any, **kwargs: Any) -> Self:
+        obj = object.__new__(cls)
+        # We have to ensure that `super().__init__()` is called, so that the objects
+        # are properly initialized.
+        DataModule.__init__(obj)
+        return obj
 
 
 class CelebAttr(Enum):
@@ -22,38 +26,44 @@ class CelebAttr(Enum):
     HAIR_COLOR = auto()
 
 
-@define(kw_only=True, repr=False, eq=False)
-class CelebaDataModule(BaseDataModule):
+@dataclass(kw_only=True, repr=False, eq=False)
+class CelebaDataModule(DcDataModule):
     target_attr: CelebAttr = CelebAttr.GENDER
+    hidden_dims: tuple[int, ...] = (128, 64)
 
     def get_name(self) -> str:
         return "celeba"
 
 
-@define(kw_only=True, repr=False, eq=False)
-class CmnistDataModule(BaseDataModule):
+@dataclass(kw_only=True, repr=False, eq=False)
+class CmnistDataModule(DcDataModule):
     padding: int = 2
 
     def get_name(self) -> str:
         return "cmnist"
 
 
-@define(kw_only=True, eq=False)
+@dataclass
 class TrainerConf:
+    """Config class with a target.
+
+    When running `instantiate()`, the constructor of the specified target is called.
+    """
+
     _target_: str = "third_party.Trainer"
-    num_gpus: int
+    num_gpus: int = 0
     max_epochs: Optional[int] = None
     val_check_interval: float = 1.0
     precision: int = 32
 
 
-@define(kw_only=True, eq=False)
+@dataclass(kw_only=True)
 class Experiment:
     """Main class for the experiment."""
 
-    data: BaseDataModule
-    trainer: TrainerConf = field(default=TrainerConf)
-    seed: int = 42
+    data: DcDataModule
+    trainer: TrainerConf = field(default_factory=TrainerConf)
+    seed: int
     use_wandb: bool = False
 
     def train(self) -> None:
@@ -63,5 +73,12 @@ class Experiment:
         print(f"Is initialized: {self.data.initialized}")
         assert isinstance(self.trainer, Trainer)
         print(f"trainer.num_gpus: {self.trainer.num_gpus}")
-        if isinstance(self.data, CelebaDataModule):
-            print(f"target_attr: {self.data.target_attr}")
+        match self.data:
+            case CelebaDataModule():
+                print(f"target_attr: {self.data.target_attr}")
+                print(f"hidden_dims: {self.data.hidden_dims}")
+                print(f"hidden_dims type: {type(self.data.hidden_dims)}")
+            case CmnistDataModule():
+                print(f"padding: {self.data.padding}")
+            case _:
+                pass
